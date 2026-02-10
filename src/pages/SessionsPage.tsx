@@ -3,9 +3,10 @@ import BreathingCircle from '../components/BreathingCircle'
 import EmptyState from '../components/EmptyState'
 import PageHeader from '../components/PageHeader'
 import SectionCard from '../components/SectionCard'
+import { haptic } from '../lib/haptics'
 import { sessionFlows } from '../lib/sampleData'
 import { useAppState } from '../lib/state'
-import type { Mood } from '../lib/types'
+import type { Mood, SessionLog } from '../lib/types'
 
 const moods: Mood[] = ['Calm', 'Focused', 'Frustrated', 'Anxious', 'Impulsive']
 
@@ -28,6 +29,10 @@ export default function SessionsPage() {
   const [checkinMood, setMood] = useState<Mood>('Focused')
   const [debrief, setDebrief] = useState('')
   const [gateBypassed, setGateBypassed] = useState(false)
+  const [tagsRaw, setTagsRaw] = useState('process, patience')
+  const [topTrigger, setTopTrigger] = useState(state.profile.topTrigger)
+  const [bestDecision, setBestDecision] = useState('')
+  const [historyFilter, setHistoryFilter] = useState('')
 
   useEffect(() => {
     setElapsed(0)
@@ -44,6 +49,17 @@ export default function SessionsPage() {
   const onFinalStep = stepIndex === flow.steps.length - 1
   const flowComplete = onFinalStep && (canAdvance || gateBypassed)
   const canSave = flowComplete && premarketPlan.trim().length >= 20 && debrief.trim().length >= 20
+
+  const filteredHistory = state.sessions.filter((s) => {
+    if (!historyFilter.trim()) return true
+    const key = historyFilter.toLowerCase()
+    return s.tags.join(' ').toLowerCase().includes(key) || s.debrief.toLowerCase().includes(key)
+  })
+
+  const highlightReel: SessionLog[] = [...state.sessions]
+    .filter((s) => s.bestDecision.trim().length > 0)
+    .sort((a, b) => b.disciplineScore - a.disciplineScore)
+    .slice(0, 3)
 
   return (
     <div className="space-y-5">
@@ -102,35 +118,22 @@ export default function SessionsPage() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <SectionCard title="1) Premarket Plan" subtitle="Define setup, invalidation, and max risk.">
-          <label className="sr-only" htmlFor="premarket-plan">Premarket plan</label>
-          <textarea
-            id="premarket-plan"
-            value={premarketPlan}
-            onChange={(e) => setPremarketPlan(e.target.value)}
-            className="app-input min-h-28"
-            placeholder="A+ setup, invalidation, max risk..."
-          />
+          <textarea value={premarketPlan} onChange={(e) => setPremarketPlan(e.target.value)} className="app-input min-h-28" placeholder="A+ setup, invalidation, max risk..." />
+          <input value={tagsRaw} onChange={(e) => setTagsRaw(e.target.value)} className="app-input mt-2" placeholder="Tags: process, fomo, discipline" />
         </SectionCard>
 
         <SectionCard title="2) Check-in Mood" subtitle="Name your internal state before the next decision.">
-          <label className="sr-only" htmlFor="checkin-mood">Check-in mood</label>
-          <select id="checkin-mood" value={checkinMood} onChange={(e) => setMood(e.target.value as Mood)} className="app-input">
+          <select value={checkinMood} onChange={(e) => setMood(e.target.value as Mood)} className="app-input">
             {moods.map((m) => (
               <option key={m}>{m}</option>
             ))}
           </select>
-          <p className="text-sm text-slate-400 mt-2">Coach cue: no new order until your process checklist is clear.</p>
+          <input className="app-input mt-2" value={topTrigger} onChange={(e) => setTopTrigger(e.target.value)} placeholder="Top trigger today" />
         </SectionCard>
 
         <SectionCard title="3) Debrief" subtitle="Capture triggers, wins, and corrections.">
-          <label className="sr-only" htmlFor="session-debrief">Session debrief</label>
-          <textarea
-            id="session-debrief"
-            value={debrief}
-            onChange={(e) => setDebrief(e.target.value)}
-            className="app-input min-h-28"
-            placeholder="What happened, what you learned, and what to repeat..."
-          />
+          <textarea value={debrief} onChange={(e) => setDebrief(e.target.value)} className="app-input min-h-28" placeholder="What happened, what you learned, and what to repeat..." />
+          <input className="app-input mt-2" value={bestDecision} onChange={(e) => setBestDecision(e.target.value)} placeholder="Best decision highlight" />
         </SectionCard>
       </div>
 
@@ -139,6 +142,7 @@ export default function SessionsPage() {
         disabled={!canSave}
         onClick={() => {
           const disciplineScore = estimateDisciplineScore(premarketPlan, debrief, checkinMood)
+          haptic('success')
           addSession({
             id: crypto.randomUUID(),
             date: new Date().toISOString(),
@@ -150,26 +154,40 @@ export default function SessionsPage() {
             disciplineScore,
             mistakes: ['Late entry'],
             wins: ['Respected max daily loss'],
+            tags: tagsRaw.split(',').map((tag) => tag.trim()).filter(Boolean),
+            topTrigger,
+            bestDecision,
+            sessionWindow: state.profile.preferredSession,
           })
           setPremarketPlan('')
           setDebrief('')
+          setBestDecision('')
           setStepIndex(0)
         }}
       >
         Save session log
       </button>
-      {!canSave && (
-        <p className="text-xs text-slate-400">Finish the full flow and add at least 20 characters for plan and debrief to unlock save.</p>
-      )}
+
+      <SectionCard title="Journal Search + Filter">
+        <input className="app-input" value={historyFilter} onChange={(e) => setHistoryFilter(e.target.value)} placeholder="Search by tag or notes" />
+      </SectionCard>
+
+      <SectionCard title="Best-decision highlight reel">
+        {highlightReel.length === 0 ? <EmptyState title="No highlights yet" description="Log your best decisions to build a confidence reel." /> : (
+          <ul className="space-y-2">
+            {highlightReel.map((s) => <li key={s.id} className="rounded-lg border border-slate-700/40 px-3 py-2 text-sm">{s.bestDecision} • score {s.disciplineScore}</li>)}
+          </ul>
+        )}
+      </SectionCard>
 
       <SectionCard title="Recent Logs">
-        {state.sessions.length === 0 ? (
-          <EmptyState title="No recent logs" description="Your saved sessions will appear here for fast review and pattern tracking." />
+        {filteredHistory.length === 0 ? (
+          <EmptyState title="No matching logs" description="Try another query or create your first session." />
         ) : (
           <ul className="space-y-2">
-            {state.sessions.slice(0, 5).map((s) => (
+            {filteredHistory.slice(0, 7).map((s) => (
               <li key={s.id} className="text-sm rounded-lg border border-slate-700/40 px-3 py-2">
-                {new Date(s.date).toLocaleDateString()}: {s.checkinMood} — {s.disciplineScore}/100
+                {new Date(s.date).toLocaleDateString()}: {s.checkinMood} — {s.disciplineScore}/100 • {s.tags.join(', ')}
               </li>
             ))}
           </ul>

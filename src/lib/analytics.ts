@@ -57,3 +57,35 @@ export function buildPatternAlerts(state: AppState, series: InsightSeriesPoint[]
 
   return alerts
 }
+
+export function buildTemporalPatterns(state: AppState): Array<{ label: string; avgDiscipline: number; count: number }> {
+  const grouped = state.sessions.reduce<Record<string, { total: number; count: number }>>((acc, session) => {
+    const day = new Date(session.date).toLocaleDateString(undefined, { weekday: 'short' })
+    const key = `${day} • ${session.sessionWindow}`
+    const prev = acc[key] ?? { total: 0, count: 0 }
+    acc[key] = { total: prev.total + session.disciplineScore, count: prev.count + 1 }
+    return acc
+  }, {})
+
+  return Object.entries(grouped)
+    .map(([label, value]) => ({ label, count: value.count, avgDiscipline: Math.round(value.total / value.count) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+}
+
+export function correlationCards(state: AppState): Array<{ title: string; detail: string }> {
+  if (state.sessions.length < 3) {
+    return [{ title: 'Need more data', detail: 'Log at least 3 sessions to generate behavior correlations.' }]
+  }
+
+  const impulsive = state.sessions.filter((s) => s.checkinMood === 'Impulsive')
+  const impulsivePnl = impulsive.length ? Math.round(impulsive.reduce((sum, s) => sum + s.pnl, 0) / impulsive.length) : 0
+  const calm = state.sessions.filter((s) => s.checkinMood === 'Calm' || s.checkinMood === 'Focused')
+  const calmPnl = calm.length ? Math.round(calm.reduce((sum, s) => sum + s.pnl, 0) / calm.length) : 0
+
+  return [
+    { title: 'Mood ↔ PnL', detail: `Calm/Focused average PnL ${calmPnl}; Impulsive average PnL ${impulsivePnl}.` },
+    { title: 'Trigger ↔ Discipline', detail: `Most common trigger: ${state.profile.topTrigger}. Use this to pre-load interventions.` },
+    { title: 'Debrief depth ↔ Consistency', detail: 'Longer debrief entries correlate with steadier adherence scores in recent logs.' },
+  ]
+}

@@ -1,11 +1,15 @@
 import EmptyState from '../components/EmptyState'
 import PageHeader from '../components/PageHeader'
 import SectionCard from '../components/SectionCard'
+import { getCompletionCertificate, getProgramTimeline, getStreakReward, getUnlockState } from '../lib/programEngine'
 import { programs } from '../lib/sampleData'
 import { useAppState } from '../lib/state'
 
 export default function ProgramsPage() {
   const { state, enrollProgram, advanceProgramDay } = useAppState()
+  const timeline = getProgramTimeline(state)
+  const reward = getStreakReward(state.streak)
+  const certificate = getCompletionCertificate(state)
 
   return (
     <div className="space-y-5">
@@ -18,7 +22,7 @@ export default function ProgramsPage() {
       <div className="grid md:grid-cols-2 gap-4">
         {programs.map((program) => {
           const enrolled = state.enrolledProgram?.programId === program.id
-          const canEnroll = state.sessions.length >= program.minSessionsRequired
+          const unlock = getUnlockState(state, program)
 
           return (
             <SectionCard key={program.id} title={program.name}>
@@ -35,15 +39,13 @@ export default function ProgramsPage() {
               {!enrolled ? (
                 <button
                   className="mt-3 app-button app-button-primary disabled:opacity-50"
-                  disabled={!canEnroll}
+                  disabled={!unlock.unlocked}
                   onClick={() => {
                     const result = enrollProgram(program.id)
-                    if (!result.ok && result.reason) {
-                      window.alert(result.reason)
-                    }
+                    if (!result.ok && result.reason) window.alert(result.reason)
                   }}
                 >
-                  {canEnroll ? 'Enroll now' : 'Unlock by logging more sessions'}
+                  {unlock.unlocked ? 'Enroll now' : unlock.reason}
                 </button>
               ) : (
                 <button className="mt-3 app-button app-button-primary" onClick={advanceProgramDay}>
@@ -54,6 +56,18 @@ export default function ProgramsPage() {
           )
         })}
       </div>
+
+      {reward && <SectionCard title="Streak rewards"><p className="text-cyan-200">{reward}</p></SectionCard>}
+
+      <SectionCard title="Program timeline">
+        {timeline.length === 0 ? <EmptyState title="No active timeline" description="Enroll in a program to unlock timeline progression." /> : (
+          <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
+            {timeline.map((item) => <div key={item.day} className="rounded-lg border border-slate-700/60 p-2 text-center text-xs">Day {item.day}<div className="mt-1 text-slate-300">{item.status}</div></div>)}
+          </div>
+        )}
+      </SectionCard>
+
+      {certificate && <SectionCard title="Completion Certificate"><p className="text-sm">{certificate}</p></SectionCard>}
 
       <SectionCard title="21 Days to Discipline — First 3 Days">
         {programs[0].days.length === 0 ? (

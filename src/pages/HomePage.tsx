@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import EmptyState from '../components/EmptyState'
 import PageHeader from '../components/PageHeader'
 import SectionCard from '../components/SectionCard'
+import { getAdaptivePrompt } from '../lib/intelligence'
 import { emergencyTools, programs } from '../lib/sampleData'
 import { useAppState } from '../lib/state'
 
@@ -13,14 +14,22 @@ export default function HomePage() {
     state.sessions.length > 0
       ? Math.round(state.sessions.reduce((sum, s) => sum + s.disciplineScore, 0) / state.sessions.length)
       : 0
+  const adaptive = getAdaptivePrompt(state)
+  const panicActive = state.panicModeUntil && new Date(state.panicModeUntil).getTime() > Date.now()
 
   return (
     <div className="space-y-5">
       <PageHeader
         eyebrow="Daily Command Center"
         title={`Good to see you, ${state.profile.name}.`}
-        subtitle="Your edge is consistency under pressure. Let today be process-first, calm, and intentional."
+        subtitle={`Style: ${state.profile.tradingStyle} • Session: ${state.profile.preferredSession}. Process-first, calm, intentional.`}
       />
+
+      {panicActive && (
+        <SectionCard title="Panic mode active" subtitle="You are in safety lock mode. New risk actions should be paused.">
+          <p className="text-red-200 text-sm">Use emergency protocol and do not place new trades until the lock timer expires.</p>
+        </SectionCard>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SectionCard title="Discipline Streak">
@@ -34,18 +43,15 @@ export default function HomePage() {
         <SectionCard title="Risk Rule">
           <p className="text-slate-100">{state.profile.riskRule}</p>
         </SectionCard>
-        <SectionCard title="Today&apos;s Focus">
-          <p className="text-slate-100">{state.profile.dailyTarget}</p>
+        <SectionCard title="Top Trigger">
+          <p className="text-slate-100">{state.profile.topTrigger}</p>
         </SectionCard>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <SectionCard title="Quick Snapshot">
-          <ul className="space-y-2 text-sm text-slate-200">
-            <li>Sessions logged: {state.sessions.length}</li>
-            <li>Emergency resets (7d): {state.emergencyUses.filter((u) => Date.now() - new Date(u.date).getTime() < 7 * 86400000).length}</li>
-            <li>Current tier: {state.subscriptionTier}</li>
-          </ul>
+        <SectionCard title={adaptive.title} subtitle="Adaptive coaching from your recent behavior.">
+          <p className="text-sm text-slate-100">{adaptive.prompt}</p>
+          <p className="text-xs mt-2 text-cyan-200">Suggested intervention: {adaptive.intervention}</p>
         </SectionCard>
 
         <SectionCard title="Emergency Shortcuts" subtitle="If your edge starts slipping, reset immediately.">
