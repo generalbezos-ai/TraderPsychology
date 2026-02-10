@@ -50,7 +50,7 @@ export default function SettingsPage() {
       <SectionCard title="Notifications">
         <div className="grid md:grid-cols-2 gap-2 text-sm">
           {Object.entries(state.notifications).map(([key, value]) => (
-            <label key={key} className="flex items-center gap-2 rounded-lg border border-slate-700/50 bg-slate-900/30 px-3 py-2">
+            <label key={key} className="app-switch list-item">
               <input type="checkbox" checked={value} onChange={(e) => setState({ ...state, notifications: { ...state.notifications, [key]: e.target.checked } })} />
               {key}
             </label>
@@ -59,7 +59,7 @@ export default function SettingsPage() {
       </SectionCard>
 
       <SectionCard title="Privacy dashboard + PIN lock">
-        <label className="inline-flex items-center gap-2 text-sm">
+        <label className="app-switch text-sm">
           <input type="checkbox" checked={state.privacy.pinEnabled} onChange={(e) => setState({ ...state, privacy: { ...state.privacy, pinEnabled: e.target.checked } })} />
           Enable PIN gate
         </label>
@@ -70,11 +70,11 @@ export default function SettingsPage() {
             setState({ ...state, privacy: { ...state.privacy, pinHash: hashPin(pinDraft), pinEnabled: true } })
             setPinDraft('')
           }}>Save PIN</button>
-          <div className="text-xs text-slate-400 rounded-lg border border-slate-700/50 p-2">PIN is local-only and never leaves device.</div>
+          <div className="surface-subtle text-xs text-slate-300 p-3">PIN is local-only and never leaves device.</div>
         </div>
-        <div className="flex gap-4 mt-3 text-sm">
-          <label className="inline-flex items-center gap-2"><input type="checkbox" checked={state.privacy.lockJournal} onChange={(e) => setState({ ...state, privacy: { ...state.privacy, lockJournal: e.target.checked } })} />Lock journal</label>
-          <label className="inline-flex items-center gap-2"><input type="checkbox" checked={state.privacy.lockInsights} onChange={(e) => setState({ ...state, privacy: { ...state.privacy, lockInsights: e.target.checked } })} />Lock insights</label>
+        <div className="flex gap-4 mt-3 text-sm flex-wrap">
+          <label className="app-switch"><input type="checkbox" checked={state.privacy.lockJournal} onChange={(e) => setState({ ...state, privacy: { ...state.privacy, lockJournal: e.target.checked } })} />Lock journal</label>
+          <label className="app-switch"><input type="checkbox" checked={state.privacy.lockInsights} onChange={(e) => setState({ ...state, privacy: { ...state.privacy, lockInsights: e.target.checked } })} />Lock insights</label>
         </div>
       </SectionCard>
 
@@ -130,12 +130,15 @@ export default function SettingsPage() {
             }
           }} />
         </label>
-        <button className="app-button app-button-danger" onClick={() => { clearState(); window.location.reload() }}>Clear all data</button>
+        <button className="app-button app-button-danger" onClick={() => {
+          if (!window.confirm('Clear all local data? This cannot be undone.')) return
+          clearState(); window.location.reload()
+        }}>Clear all data</button>
       </SectionCard>
 
       <SectionCard title="Subscription">
         <p className="text-sm text-slate-300">Current tier: {state.subscriptionTier}</p>
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2 flex gap-2 flex-wrap">
           <button className="app-button app-button-muted" onClick={() => setState({ ...state, subscriptionTier: 'Free' })}>Free</button>
           <button className="app-button app-button-primary" onClick={() => setState({ ...state, subscriptionTier: 'Pro' })}>Upgrade to Pro</button>
         </div>

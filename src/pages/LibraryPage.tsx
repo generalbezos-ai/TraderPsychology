@@ -30,16 +30,16 @@ export default function LibraryPage() {
 
       <SectionCard title="Audio player">
         <p className="text-sm text-slate-300">{playingTrack ? `Now playing: ${playingTrack.title}` : 'Select a track to play'}</p>
-        <div className="mt-2 grid md:grid-cols-3 gap-2">
-          <label className="text-xs text-slate-400">Master volume {volume}%
-            <input type="range" className="w-full" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} />
+        <div className="mt-2 grid md:grid-cols-3 gap-3">
+          <label className="surface-subtle text-xs text-slate-300 p-3">Master volume {volume}%
+            <input type="range" className="w-full mt-1 accent-violet-300" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} />
           </label>
-          <label className="text-xs text-slate-400">Ambient preset
+          <label className="text-xs text-slate-300">Ambient preset
             <select className="app-input mt-1" value={ambient} onChange={(e) => setAmbient(e.target.value as (typeof ambientPresets)[number])}>
               {ambientPresets.map((preset) => <option key={preset}>{preset}</option>)}
             </select>
           </label>
-          <div className="text-xs text-slate-400 rounded-lg border border-slate-700/50 p-2">Offline-ready: recently played tracks are cached when service worker is active.</div>
+          <div className="surface-subtle text-xs text-slate-300 p-3">Offline-ready: recently played tracks are cached when service worker is active.</div>
         </div>
       </SectionCard>
 
@@ -67,10 +67,10 @@ export default function LibraryPage() {
               {tracks.map((track) => {
                 const favorite = state.favoriteLibraryIds.includes(track.id)
                 return (
-                  <li key={track.id} className="flex items-center justify-between rounded-lg border border-slate-700/50 p-3">
+                  <li key={track.id} className="list-item flex items-center justify-between">
                     <div>
                       <p>{track.title}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-300">
                         {track.category} • {track.lengthMin}m • {track.narrator}
                       </p>
                     </div>
@@ -88,9 +88,9 @@ export default function LibraryPage() {
         </SectionCard>
 
         <SectionCard title="Mindset Vault">
-          <ul className="space-y-2 text-slate-200">
+          <ul className="space-y-2 text-slate-100">
             {mindsetQuotes.map((quote) => (
-              <li key={quote}>“{quote}”</li>
+              <li key={quote} className="list-item">“{quote}”</li>
             ))}
           </ul>
         </SectionCard>

@@ -72,13 +72,13 @@ export default function EmergencyPage() {
 
       <SectionCard title={tool.name} subtitle={`Trigger: ${tool.trigger}`}>
         <div className="mb-3">
-          <label className="inline-flex items-center gap-2 text-sm text-slate-300">
+          <label className="app-switch surface-subtle text-sm text-slate-200">
             <input type="checkbox" checked={voiceGuided} onChange={(e) => setVoiceGuided(e.target.checked)} />
             Voice-guided protocol (speechSynthesis fallback)
           </label>
         </div>
         <p className="font-semibold mb-2">Step {stepIndex + 1} / {tool.steps.length}: {step.title}</p>
-        <p className="text-slate-200">{step.script}</p>
+        <p className="text-slate-100">{step.script}</p>
         <BreathingCircle phase={canNext ? 'Complete' : 'Stay'} seconds={remaining} variant="emergency" />
 
         {!started ? (
@@ -95,7 +95,7 @@ export default function EmergencyPage() {
         ) : (
           <div className="flex gap-2 flex-wrap">
             <button
-              className="app-button app-button-danger disabled:opacity-50"
+              className="app-button app-button-danger"
               disabled={!canNext || stepIndex === tool.steps.length - 1}
               onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
             >

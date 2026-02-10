@@ -89,16 +89,16 @@ export default function SessionsPage() {
       </SectionCard>
 
       <SectionCard title={`Step ${stepIndex + 1} / ${flow.steps.length}: ${step.title}`}>
-        <p className="text-slate-200">{step.prompt}</p>
+        <p className="text-slate-100">{step.prompt}</p>
         <BreathingCircle phase={canAdvance || gateBypassed ? 'Ready' : 'Stay'} seconds={elapsed} variant="calm" />
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-slate-300">
           Minimum: {step.minSeconds}s{step.maxSeconds ? ` • Preferred max: ${step.maxSeconds}s` : ''}
         </p>
-        {!inMaxWindow && <p className="text-amber-300 text-sm mt-1">You&apos;re past the ideal pacing window—advance and maintain momentum.</p>}
+        {!inMaxWindow && <p className="text-amber-200 text-sm mt-1">You&apos;re past the ideal pacing window—advance and maintain momentum.</p>}
 
         <div className="mt-3 flex gap-2 flex-wrap">
           <button
-            className="app-button app-button-primary disabled:opacity-50"
+            className="app-button app-button-primary"
             disabled={(!canAdvance && !gateBypassed) || onFinalStep}
             onClick={() => setStepIndex((v) => Math.min(flow.steps.length - 1, v + 1))}
           >
@@ -138,7 +138,7 @@ export default function SessionsPage() {
       </div>
 
       <button
-        className="app-button app-button-primary disabled:opacity-50"
+        className="app-button app-button-primary"
         disabled={!canSave}
         onClick={() => {
           const disciplineScore = estimateDisciplineScore(premarketPlan, debrief, checkinMood)
@@ -175,7 +175,7 @@ export default function SessionsPage() {
       <SectionCard title="Best-decision highlight reel">
         {highlightReel.length === 0 ? <EmptyState title="No highlights yet" description="Log your best decisions to build a confidence reel." /> : (
           <ul className="space-y-2">
-            {highlightReel.map((s) => <li key={s.id} className="rounded-lg border border-slate-700/40 px-3 py-2 text-sm">{s.bestDecision} • score {s.disciplineScore}</li>)}
+            {highlightReel.map((s) => <li key={s.id} className="list-item text-sm">{s.bestDecision} • score {s.disciplineScore}</li>)}
           </ul>
         )}
       </SectionCard>
@@ -186,7 +186,7 @@ export default function SessionsPage() {
         ) : (
           <ul className="space-y-2">
             {filteredHistory.slice(0, 7).map((s) => (
-              <li key={s.id} className="text-sm rounded-lg border border-slate-700/40 px-3 py-2">
+              <li key={s.id} className="list-item text-sm">
                 {new Date(s.date).toLocaleDateString()}: {s.checkinMood} — {s.disciplineScore}/100 • {s.tags.join(', ')}
               </li>
             ))}

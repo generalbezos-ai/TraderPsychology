@@ -22,24 +22,25 @@ export default function OnboardingWizard() {
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
       <div className="card max-w-2xl w-full p-6 space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">60-second setup • {progress}</p>
-        <h2 className="text-2xl font-bold">Personalize your coaching cockpit</h2>
+        <p className="badge">60-second setup • {progress}</p>
+        <h2 className="text-2xl font-bold md:text-3xl">Personalize your coaching cockpit</h2>
+        <p className="text-sm text-slate-300">Build your baseline now so each module can adapt with precision.</p>
 
         {step === 0 && (
           <div>
-            <label className="text-sm text-slate-300">Name</label>
+            <label className="text-sm text-slate-200">Name</label>
             <input className="app-input mt-1" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
         )}
 
         {step === 1 && (
           <div className="grid sm:grid-cols-2 gap-3">
-            <label className="text-sm text-slate-300">Style
+            <label className="text-sm text-slate-200">Style
               <select className="app-input mt-1" value={form.tradingStyle} onChange={(e) => setForm({ ...form, tradingStyle: e.target.value as (typeof styles)[number] })}>
                 {styles.map((item) => <option key={item}>{item}</option>)}
               </select>
             </label>
-            <label className="text-sm text-slate-300">Session
+            <label className="text-sm text-slate-200">Session
               <select className="app-input mt-1" value={form.preferredSession} onChange={(e) => setForm({ ...form, preferredSession: e.target.value as (typeof sessions)[number] })}>
                 {sessions.map((item) => <option key={item}>{item}</option>)}
               </select>
@@ -49,19 +50,19 @@ export default function OnboardingWizard() {
 
         {step === 2 && (
           <div>
-            <label className="text-sm text-slate-300">Risk rule</label>
+            <label className="text-sm text-slate-200">Risk rule</label>
             <textarea className="app-input min-h-24 mt-1" value={form.riskRule} onChange={(e) => setForm({ ...form, riskRule: e.target.value })} />
           </div>
         )}
 
         {step === 3 && (
           <div>
-            <label className="text-sm text-slate-300">Top emotional trigger</label>
+            <label className="text-sm text-slate-200">Top emotional trigger</label>
             <textarea className="app-input min-h-24 mt-1" value={form.topTrigger} onChange={(e) => setForm({ ...form, topTrigger: e.target.value })} />
           </div>
         )}
 
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-2">
           <button className="app-button app-button-muted" disabled={step === 0} onClick={() => setStep((v) => Math.max(0, v - 1))}>Back</button>
           <button
             className="app-button app-button-primary"

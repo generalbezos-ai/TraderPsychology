@@ -33,31 +33,31 @@ export default function HomePage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SectionCard title="Discipline Streak">
-          <p className="text-4xl font-bold text-violet-300">{state.streak} days</p>
-          <p className="mt-1 text-xs text-slate-400">Protect the streak by executing your plan before reacting to price.</p>
+          <p className="metric-value text-violet-200">{state.streak} days</p>
+          <p className="mt-2 text-xs text-slate-300">Protect the streak by executing your plan before reacting to price.</p>
         </SectionCard>
         <SectionCard title="Average Discipline">
-          <p className="text-4xl font-bold text-cyan-300">{avgDiscipline || '--'}</p>
-          <p className="text-xs text-slate-400 mt-1">Based on {state.sessions.length} logged sessions</p>
+          <p className="metric-value text-cyan-200">{avgDiscipline || '--'}</p>
+          <p className="text-xs text-slate-300 mt-2">Based on {state.sessions.length} logged sessions</p>
         </SectionCard>
         <SectionCard title="Risk Rule">
-          <p className="text-slate-100">{state.profile.riskRule}</p>
+          <p className="text-slate-100 text-sm leading-relaxed">{state.profile.riskRule}</p>
         </SectionCard>
         <SectionCard title="Top Trigger">
-          <p className="text-slate-100">{state.profile.topTrigger}</p>
+          <p className="text-slate-100 text-sm leading-relaxed">{state.profile.topTrigger}</p>
         </SectionCard>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <SectionCard title={adaptive.title} subtitle="Adaptive coaching from your recent behavior.">
           <p className="text-sm text-slate-100">{adaptive.prompt}</p>
-          <p className="text-xs mt-2 text-cyan-200">Suggested intervention: {adaptive.intervention}</p>
+          <p className="text-xs mt-3 text-cyan-200">Suggested intervention: {adaptive.intervention}</p>
         </SectionCard>
 
         <SectionCard title="Emergency Shortcuts" subtitle="If your edge starts slipping, reset immediately.">
           <ul className="space-y-2 text-sm">
             {emergencyTools.map((tool) => (
-              <li key={tool.id} className="flex items-center justify-between rounded-xl border border-slate-700/50 px-3 py-2">
+              <li key={tool.id} className="list-item flex items-center justify-between">
                 <span>{tool.name}</span>
                 <Link className="text-red-300 hover:text-red-200" to="/emergency">
                   Launch
@@ -94,7 +94,7 @@ export default function HomePage() {
 
       <SectionCard title="Latest Session">
         {last ? (
-          <p className="text-slate-200">
+          <p className="text-slate-100 text-sm">
             {new Date(last.date).toLocaleDateString()}: {last.checkinMood}, discipline {last.disciplineScore}/100, PnL {last.pnl}
           </p>
         ) : (
