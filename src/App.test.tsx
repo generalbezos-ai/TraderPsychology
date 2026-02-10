@@ -4,11 +4,7 @@ import App from './App'
 
 describe('App routes', () => {
   it('renders home headline', async () => {
-    render(
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>,
-    )
+    render(<MemoryRouter><App /></MemoryRouter>)
     expect(await screen.findByText(/good to see you/i)).toBeInTheDocument()
   })
 
@@ -19,6 +15,6 @@ describe('App routes', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText(/good to see you/i)).toBeInTheDocument()
+    expect(await screen.findByText(/daily command center/i)).toBeInTheDocument()
   })
 })
