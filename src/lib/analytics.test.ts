@@ -1,4 +1,4 @@
-import { buildInsightSeriesFromState, buildPatternAlerts } from './analytics'
+import { buildInsightSeriesFromState, buildPatternAlerts, correlationCards } from './analytics'
 import { defaultState } from './storage'
 
 describe('analytics', () => {
@@ -17,6 +17,10 @@ describe('analytics', () => {
           disciplineScore: 66,
           mistakes: [],
           wins: [],
+          tags: ['fomo'],
+          topTrigger: 'fomo',
+          bestDecision: 'stopped out quickly',
+          sessionWindow: 'NewYork' as const,
         },
       ],
     }
@@ -42,5 +46,9 @@ describe('analytics', () => {
     const series = buildInsightSeriesFromState(state)
     const alerts = buildPatternAlerts(state, series)
     expect(alerts.some((a) => a.id === 'high-emergency-frequency')).toBe(true)
+  })
+
+  it('builds fallback correlation card with low data', () => {
+    expect(correlationCards(defaultState)[0].title).toContain('Need more data')
   })
 })

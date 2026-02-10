@@ -1,16 +1,19 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import AppShell from './AppShell'
+import { StateProvider } from '../lib/state'
 
 it('exposes navigation links with accessible labels', () => {
   render(
-    <MemoryRouter>
-      <Routes>
-        <Route element={<AppShell />}>
-          <Route path="*" element={<div>content</div>} />
-        </Route>
-      </Routes>
-    </MemoryRouter>,
+    <StateProvider>
+      <MemoryRouter>
+        <Routes>
+          <Route element={<AppShell />}>
+            <Route path="*" element={<div>content</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </StateProvider>,
   )
 
   const links = screen.getAllByRole('link')

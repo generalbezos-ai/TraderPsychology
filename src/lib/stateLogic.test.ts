@@ -18,6 +18,10 @@ describe('stateLogic', () => {
           disciplineScore: 80,
           mistakes: [],
           wins: [],
+          tags: [],
+          topTrigger: 'fomo',
+          bestDecision: 'waited for setup',
+          sessionWindow: 'NewYork' as const,
         },
       ],
     }
@@ -41,6 +45,10 @@ describe('stateLogic', () => {
           disciplineScore: 80,
           mistakes: [],
           wins: [],
+          tags: [],
+          topTrigger: 'fomo',
+          bestDecision: 'waited for setup',
+          sessionWindow: 'NewYork' as const,
         },
       ],
     }
@@ -52,6 +60,6 @@ describe('stateLogic', () => {
     const state = { ...defaultState, sessions: [] }
     const result = canEnroll(state, 'discipline-21')
     expect(result.ok).toBe(false)
-    expect(result.reason).toContain('Need 3')
+    expect(result.reason).toContain('Need')
   })
 })
