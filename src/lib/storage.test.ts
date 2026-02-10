@@ -20,6 +20,13 @@ describe('storage', () => {
     expect(loaded.notifications.premarketReminder).toBe(true)
   })
 
+  it('falls back safely on malformed shapes', () => {
+    localStorage.setItem('traders-mind-state', JSON.stringify({ sessions: {}, favoriteLibraryIds: [1, 'ok'] }))
+    const loaded = loadState()
+    expect(loaded.sessions).toEqual([])
+    expect(loaded.favoriteLibraryIds).toEqual(['ok'])
+  })
+
   it('clears state', () => {
     saveState(defaultState)
     clearState()

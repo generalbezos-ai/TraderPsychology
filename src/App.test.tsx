@@ -2,7 +2,19 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import App from './App'
 
-it('renders home headline', () => {
-  render(<MemoryRouter><App /></MemoryRouter>)
-  expect(screen.getByText(/welcome back/i)).toBeInTheDocument()
+describe('App routes', () => {
+  it('renders home headline', async () => {
+    render(<MemoryRouter><App /></MemoryRouter>)
+    expect(await screen.findByText(/welcome back/i)).toBeInTheDocument()
+  })
+
+  it('redirects unknown routes to home', async () => {
+    render(
+      <MemoryRouter initialEntries={['/does-not-exist']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText(/welcome back/i)).toBeInTheDocument()
+  })
 })
