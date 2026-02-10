@@ -11,6 +11,10 @@ export interface SessionLog {
   disciplineScore: number
   mistakes: string[]
   wins: string[]
+  tags: string[]
+  topTrigger: string
+  bestDecision: string
+  sessionWindow: 'London' | 'NewYork' | 'Asia' | 'Custom'
 }
 
 export interface SessionStep {
@@ -71,6 +75,8 @@ export interface Enrollment {
   programId: string
   startedAt: string
   dayIndex: number
+  completedDays: number[]
+  rewardsClaimed: number[]
 }
 
 export interface LibraryTrack {
@@ -79,6 +85,7 @@ export interface LibraryTrack {
   category: 'Breathwork' | 'Visualization' | 'Self-Talk' | 'Recovery'
   lengthMin: number
   narrator: string
+  audioUrl?: string
 }
 
 export interface PatternAlert {
@@ -95,21 +102,56 @@ export interface Notifications {
   emergencyNudge: boolean
 }
 
+export interface ReminderSettings {
+  morningTime: string
+  sessionTime: string
+  debriefTime: string
+}
+
 export interface Profile {
   name: string
   riskRule: string
   dailyTarget: string
   timezone: string
+  tradingStyle: 'Scalper' | 'Intraday' | 'Swing'
+  preferredSession: 'London' | 'NewYork' | 'Asia' | 'Custom'
+  topTrigger: string
+}
+
+export interface OnboardingState {
+  completed: boolean
+  completedAt?: string
+  currentStep: number
+}
+
+export interface PrivacyState {
+  pinEnabled: boolean
+  pinHash: string
+  lockJournal: boolean
+  lockInsights: boolean
+}
+
+export interface LocalAccountProfile {
+  enabled: boolean
+  accountName: string
+  emailHint: string
+  cloudAdapter: 'none' | 'mock-drive'
+  lastBackupAt?: string
 }
 
 export interface AppState {
   version: number
   profile: Profile
   notifications: Notifications
+  reminders: ReminderSettings
+  onboarding: OnboardingState
+  privacy: PrivacyState
+  localAccount: LocalAccountProfile
   sessions: SessionLog[]
   emergencyUses: EmergencyUse[]
   streak: number
   enrolledProgram: Enrollment | null
   favoriteLibraryIds: string[]
   subscriptionTier: 'Free' | 'Pro'
+  panicModeUntil?: string
 }

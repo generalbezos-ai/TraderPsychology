@@ -1,0 +1,16 @@
+{
+  "name": "Trader's Mind",
+  "short_name": "TraderMind",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050712",
+  "theme_color": "#10182d",
+  "description": "Trading psychology coaching cockpit",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

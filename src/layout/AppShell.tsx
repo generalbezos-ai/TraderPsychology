@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { NavLink, Outlet } from 'react-router-dom'
 import { AlertTriangle, BookOpen, Brain, Gauge, Home, Settings, Timer } from 'lucide-react'
 import SOSButton from '../components/SOSButton'
+import { useAppState } from '../lib/state'
 
 const links = [
   { to: '/', icon: Home, label: 'Home' },
@@ -14,6 +15,9 @@ const links = [
 ]
 
 export default function AppShell() {
+  const { state } = useAppState()
+  const panic = state.panicModeUntil && new Date(state.panicModeUntil).getTime() > Date.now()
+
   return (
     <div className="min-h-screen md:grid md:grid-cols-[262px_1fr]">
       <aside className="hidden md:flex flex-col border-r border-slate-700/30 p-4 gap-2 sticky top-0 h-screen bg-slate-950/70 backdrop-blur-xl">
@@ -39,7 +43,8 @@ export default function AppShell() {
           ))}
         </nav>
       </aside>
-      <main className="fade-in mx-auto w-full max-w-7xl p-4 pb-28 md:p-8">
+      <main className="fade-in mx-auto w-full max-w-7xl p-4 pb-28 md:p-8 space-y-3">
+        {panic && <div className="rounded-lg border border-red-400/40 bg-red-950/40 px-3 py-2 text-xs text-red-200">Panic mode is active. Focus on recovery protocols.</div>}
         <Outlet />
       </main>
       <nav

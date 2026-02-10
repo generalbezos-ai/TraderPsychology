@@ -1,4 +1,5 @@
 import { programs } from './sampleData'
+import { getUnlockState } from './programEngine'
 import type { AppState } from './types'
 
 export function nextStreak(current: AppState, now = new Date()): number {
@@ -21,9 +22,8 @@ export function canEnroll(state: AppState, programId: string): { ok: boolean; re
     return { ok: false, reason: 'Only one active program allowed.' }
   }
 
-  if (state.sessions.length < program.minSessionsRequired) {
-    return { ok: false, reason: `Need ${program.minSessionsRequired} logged sessions before enrolling.` }
-  }
+  const unlock = getUnlockState(state, program)
+  if (!unlock.unlocked) return { ok: false, reason: unlock.reason }
 
   return { ok: true }
 }

@@ -11,6 +11,8 @@ interface StateCtx {
   enrollProgram: (programId: string) => { ok: boolean; reason?: string }
   advanceProgramDay: () => void
   toggleFavoriteTrack: (trackId: string) => void
+  importState: (next: AppState) => void
+  setPanicMode: (minutes: number) => void
 }
 
 const Ctx = createContext<StateCtx | null>(null)
@@ -42,7 +44,13 @@ export function StateProvider({ children }: { children: React.ReactNode }) {
   const enrollProgram = useCallback((programId: string) => {
     const check = canEnroll(state, programId)
     if (!check.ok) return check
-    const enrollment: Enrollment = { programId, startedAt: new Date().toISOString(), dayIndex: 0 }
+    const enrollment: Enrollment = {
+      programId,
+      startedAt: new Date().toISOString(),
+      dayIndex: 0,
+      completedDays: [],
+      rewardsClaimed: [],
+    }
     setState({ ...state, enrolledProgram: enrollment })
     return { ok: true }
   }, [setState, state])
@@ -50,11 +58,16 @@ export function StateProvider({ children }: { children: React.ReactNode }) {
   const advanceProgramDay = useCallback(() => {
     updateState((prev) => {
       if (!prev.enrolledProgram) return prev
+      const day = prev.enrolledProgram.dayIndex + 1
+      const completedDays = prev.enrolledProgram.completedDays.includes(day)
+        ? prev.enrolledProgram.completedDays
+        : [...prev.enrolledProgram.completedDays, day]
       return {
         ...prev,
         enrolledProgram: {
           ...prev.enrolledProgram,
           dayIndex: prev.enrolledProgram.dayIndex + 1,
+          completedDays,
         },
       }
     })
@@ -72,6 +85,17 @@ export function StateProvider({ children }: { children: React.ReactNode }) {
     })
   }, [updateState])
 
+  const importState = useCallback((next: AppState) => {
+    setState(next)
+  }, [setState])
+
+  const setPanicMode = useCallback((minutes: number) => {
+    updateState((prev) => ({
+      ...prev,
+      panicModeUntil: new Date(Date.now() + minutes * 60000).toISOString(),
+    }))
+  }, [updateState])
+
   const value = useMemo<StateCtx>(() => ({
     state,
     setState,
@@ -80,7 +104,9 @@ export function StateProvider({ children }: { children: React.ReactNode }) {
     enrollProgram,
     advanceProgramDay,
     toggleFavoriteTrack,
-  }), [state, setState, addSession, logEmergencyUse, enrollProgram, advanceProgramDay, toggleFavoriteTrack])
+    importState,
+    setPanicMode,
+  }), [state, setState, addSession, logEmergencyUse, enrollProgram, advanceProgramDay, toggleFavoriteTrack, importState, setPanicMode])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
