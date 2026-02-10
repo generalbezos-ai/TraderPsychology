@@ -7,6 +7,13 @@ import type { Mood } from '../lib/types'
 
 const moods: Mood[] = ['Calm', 'Focused', 'Frustrated', 'Anxious', 'Impulsive']
 
+function estimateDisciplineScore(plan: string, debrief: string, mood: Mood): number {
+  const base = mood === 'Calm' || mood === 'Focused' ? 82 : mood === 'Frustrated' ? 72 : 68
+  const prepBonus = Math.min(8, Math.floor(plan.trim().length / 30))
+  const reviewBonus = Math.min(10, Math.floor(debrief.trim().length / 25))
+  return Math.max(45, Math.min(99, base + prepBonus + reviewBonus))
+}
+
 export default function SessionsPage() {
   const { addSession, state } = useAppState()
   const [flowId, setFlowId] = useState(sessionFlows[0].id)
@@ -18,9 +25,11 @@ export default function SessionsPage() {
   const [premarketPlan, setPremarketPlan] = useState('')
   const [checkinMood, setMood] = useState<Mood>('Focused')
   const [debrief, setDebrief] = useState('')
+  const [gateBypassed, setGateBypassed] = useState(false)
 
   useEffect(() => {
     setElapsed(0)
+    setGateBypassed(false)
   }, [flowId, stepIndex])
 
   useEffect(() => {
@@ -30,6 +39,9 @@ export default function SessionsPage() {
 
   const canAdvance = elapsed >= step.minSeconds
   const inMaxWindow = !step.maxSeconds || elapsed <= step.maxSeconds
+  const onFinalStep = stepIndex === flow.steps.length - 1
+  const flowComplete = onFinalStep && (canAdvance || gateBypassed)
+  const canSave = flowComplete && premarketPlan.trim().length >= 20 && debrief.trim().length >= 20
 
   return (
     <div className="space-y-4">
@@ -54,23 +66,26 @@ export default function SessionsPage() {
 
       <SectionCard title={`Step ${stepIndex + 1} / ${flow.steps.length}: ${step.title}`}>
         <p className="text-slate-200">{step.prompt}</p>
-        <BreathingCircle phase={canAdvance ? 'Ready' : 'Stay'} seconds={elapsed} variant="calm" />
+        <BreathingCircle phase={canAdvance || gateBypassed ? 'Ready' : 'Stay'} seconds={elapsed} variant="calm" />
         <p className="text-sm text-slate-400">
           Minimum: {step.minSeconds}s{step.maxSeconds ? ` • Preferred max: ${step.maxSeconds}s` : ''}
         </p>
         {!inMaxWindow && <p className="text-amber-300 text-sm mt-1">You are beyond the preferred time window. Move to next step.</p>}
 
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex gap-2 flex-wrap">
           <button
             className="bg-violet-600 px-4 py-2 rounded disabled:opacity-50"
-            disabled={!canAdvance || stepIndex === flow.steps.length - 1}
+            disabled={(!canAdvance && !gateBypassed) || onFinalStep}
             onClick={() => setStepIndex((v) => Math.min(flow.steps.length - 1, v + 1))}
           >
             Next step
           </button>
           <button
             className="bg-slate-700 px-4 py-2 rounded"
-            onClick={() => setStepIndex((v) => Math.min(flow.steps.length - 1, v + 1))}
+            onClick={() => {
+              setGateBypassed(true)
+              setStepIndex((v) => Math.min(flow.steps.length - 1, v + 1))
+            }}
           >
             {step.overrideLabel ?? 'Override time gate'}
           </button>
@@ -107,8 +122,10 @@ export default function SessionsPage() {
       </div>
 
       <button
-        className="bg-violet-600 px-4 py-2 rounded font-semibold"
-        onClick={() =>
+        className="bg-violet-600 px-4 py-2 rounded font-semibold disabled:opacity-50"
+        disabled={!canSave}
+        onClick={() => {
+          const disciplineScore = estimateDisciplineScore(premarketPlan, debrief, checkinMood)
           addSession({
             id: crypto.randomUUID(),
             date: new Date().toISOString(),
@@ -117,14 +134,22 @@ export default function SessionsPage() {
             checkinMood,
             debrief,
             pnl: Math.round(Math.random() * 350 - 140),
-            disciplineScore: Math.round(Math.random() * 22 + 73),
+            disciplineScore,
             mistakes: ['Late entry'],
             wins: ['Respected max daily loss'],
           })
-        }
+          setPremarketPlan('')
+          setDebrief('')
+          setStepIndex(0)
+        }}
       >
         Save Session
       </button>
+      {!canSave && (
+        <p className="text-xs text-slate-400">
+          Complete the flow and add at least 20 characters each for Premarket Plan and Debrief before saving.
+        </p>
+      )}
 
       <SectionCard title="Recent Logs">
         <ul className="space-y-2">

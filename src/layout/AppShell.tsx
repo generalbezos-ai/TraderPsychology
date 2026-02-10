@@ -19,15 +19,15 @@ export default function AppShell() {
         <h1 className="text-xl font-bold mb-4">Trader's Mind</h1>
         {links.map(({ to, icon: Icon, label }) => (
           <NavLink key={to} to={to} className={({ isActive }) => `px-3 py-2 rounded-lg flex items-center gap-2 ${isActive ? 'bg-violet-600/30 text-violet-200' : 'text-slate-300 hover:bg-slate-800'}`}>
-            <Icon size={16} /> {label}
+            <Icon size={16} aria-hidden="true" /> {label}
           </NavLink>
         ))}
       </aside>
-      <main className="p-4 pb-24 md:p-8"><Outlet /></main>
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 border-t border-slate-700/40 grid grid-cols-7 p-1">
+      <main className="p-4 pb-28 md:p-8"><Outlet /></main>
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 border-t border-slate-700/40 grid grid-cols-7 p-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         {links.map(({ to, icon: Icon, label }) => (
-          <NavLink key={to} to={to} className={({ isActive }) => `text-[11px] flex flex-col items-center p-1 ${isActive ? 'text-violet-300' : 'text-slate-400'}`}>
-            <Icon size={16} /><span>{label}</span>
+          <NavLink key={to} to={to} aria-label={label} className={({ isActive }) => `text-[11px] flex flex-col items-center p-1 ${isActive ? 'text-violet-300' : 'text-slate-400'}`}>
+            <Icon size={16} aria-hidden="true" /><span>{label}</span>
           </NavLink>
         ))}
       </nav>

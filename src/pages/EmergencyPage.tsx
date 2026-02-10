@@ -8,6 +8,7 @@ export default function EmergencyPage() {
   const { logEmergencyUse } = useAppState()
   const [activeToolId, setActiveToolId] = useState(emergencyTools[0].id)
   const [stepIndex, setStepIndex] = useState(0)
+  const [started, setStarted] = useState(false)
   const tool = useMemo(() => emergencyTools.find((t) => t.id === activeToolId) ?? emergencyTools[0], [activeToolId])
   const step = tool.steps[stepIndex]
   const [remaining, setRemaining] = useState(step.durationSeconds)
@@ -15,17 +16,20 @@ export default function EmergencyPage() {
   useEffect(() => {
     setStepIndex(0)
     setRemaining(tool.steps[0].durationSeconds)
-    logEmergencyUse(tool.id)
-  }, [tool.id, logEmergencyUse, tool.steps])
+    setStarted(false)
+  }, [tool.id, tool.steps])
 
   useEffect(() => {
     setRemaining(step.durationSeconds)
   }, [step.durationSeconds])
 
   useEffect(() => {
-    const timer = window.setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000)
+    const timer = window.setInterval(() => {
+      if (!started) return
+      setRemaining((r) => Math.max(0, r - 1))
+    }, 1000)
     return () => window.clearInterval(timer)
-  }, [])
+  }, [started])
 
   const canNext = remaining === 0
 
@@ -50,21 +54,40 @@ export default function EmergencyPage() {
         <p className="text-slate-200">{step.script}</p>
         <BreathingCircle phase={canNext ? 'Complete' : 'Stay'} seconds={remaining} variant="emergency" />
 
-        <div className="flex gap-2">
+        {!started ? (
           <button
-            className="bg-red-600 px-4 py-2 rounded disabled:opacity-50"
-            disabled={!canNext || stepIndex === tool.steps.length - 1}
-            onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
+            className="bg-red-600 px-4 py-2 rounded"
+            onClick={() => {
+              setStarted(true)
+              logEmergencyUse(tool.id)
+            }}
           >
-            Next (gated)
+            Start protocol
           </button>
-          <button
-            className="bg-slate-700 px-4 py-2 rounded"
-            onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
-          >
-            Override now
-          </button>
-        </div>
+        ) : (
+          <div className="flex gap-2 flex-wrap">
+            <button
+              className="bg-red-600 px-4 py-2 rounded disabled:opacity-50"
+              disabled={!canNext || stepIndex === tool.steps.length - 1}
+              onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
+            >
+              Next (gated)
+            </button>
+            <button
+              className="bg-slate-700 px-4 py-2 rounded"
+              onClick={() => setStepIndex((v) => Math.max(0, v - 1))}
+              disabled={stepIndex === 0}
+            >
+              Back
+            </button>
+            <button
+              className="bg-slate-700 px-4 py-2 rounded"
+              onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
+            >
+              Override now
+            </button>
+          </div>
+        )}
       </SectionCard>
     </div>
   )

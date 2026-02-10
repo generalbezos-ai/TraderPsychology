@@ -8,23 +8,25 @@ export default function SettingsPage() {
   const [name, setName] = useState(state.profile.name)
   const [riskRule, setRiskRule] = useState(state.profile.riskRule)
   const [dailyTarget, setDailyTarget] = useState(state.profile.dailyTarget)
+  const [timezone, setTimezone] = useState(state.profile.timezone)
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Settings</h1>
 
       <SectionCard title="Profile">
-        <div className="grid md:grid-cols-3 gap-2">
+        <div className="grid md:grid-cols-4 gap-2">
           <input value={name} onChange={(e) => setName(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Name" />
           <input value={riskRule} onChange={(e) => setRiskRule(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Risk rule" />
           <input value={dailyTarget} onChange={(e) => setDailyTarget(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Daily target" />
+          <input value={timezone} onChange={(e) => setTimezone(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Timezone (e.g. UTC)" />
         </div>
         <button
           className="mt-2 bg-violet-600 px-3 py-2 rounded"
           onClick={() =>
             setState({
               ...state,
-              profile: { ...state.profile, name, riskRule, dailyTarget },
+              profile: { ...state.profile, name, riskRule, dailyTarget, timezone },
             })
           }
         >
@@ -57,10 +59,12 @@ export default function SettingsPage() {
           className="bg-cyan-700 px-3 py-2 rounded mr-2"
           onClick={() => {
             const blob = new Blob([exportState()], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
-            a.href = URL.createObjectURL(blob)
+            a.href = url
             a.download = 'traders-mind-export.json'
             a.click()
+            URL.revokeObjectURL(url)
           }}
         >
           Export JSON

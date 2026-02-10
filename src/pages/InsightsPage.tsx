@@ -1,12 +1,12 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import SectionCard from '../components/SectionCard'
-import { generate30DayInsights, getPatternAlerts } from '../lib/sampleData'
+import { buildInsightSeriesFromState, buildPatternAlerts } from '../lib/analytics'
 import { useAppState } from '../lib/state'
 
 export default function InsightsPage() {
   const { state } = useAppState()
-  const data = generate30DayInsights()
-  const alerts = getPatternAlerts(data)
+  const data = buildInsightSeriesFromState(state)
+  const alerts = buildPatternAlerts(state, data)
 
   const moodMix = state.sessions.reduce<Record<string, number>>((acc, session) => {
     acc[session.checkinMood] = (acc[session.checkinMood] ?? 0) + 1
