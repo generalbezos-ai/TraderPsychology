@@ -1,33 +1,70 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BreathingCircle from '../components/BreathingCircle'
 import SectionCard from '../components/SectionCard'
+import { emergencyTools } from '../lib/sampleData'
 import { useAppState } from '../lib/state'
-
-const tools = [
-  { name: 'Impulse Stop', checklist: ['Step away from keyboard', 'Close chart 2 minutes', 'Read risk rule aloud'], sec: 120 },
-  { name: 'Loss Spiral Reset', checklist: ['Label emotion', 'Drink water', 'Reduce size 50%'], sec: 180 },
-  { name: 'FOMO Defuse', checklist: ['Market will open tomorrow', 'Missed trade ≠ missed career', 'Wait next setup'], sec: 90 },
-  { name: 'Revenge Trade Blocker', checklist: ['No new position for timer', 'Journal urge trigger', 'One deep reset'], sec: 240 },
-]
 
 export default function EmergencyPage() {
   const { logEmergencyUse } = useAppState()
-  const [active, setActive] = useState(0)
-  const [remaining, setRemaining] = useState(tools[0].sec)
+  const [activeToolId, setActiveToolId] = useState(emergencyTools[0].id)
+  const [stepIndex, setStepIndex] = useState(0)
+  const tool = useMemo(() => emergencyTools.find((t) => t.id === activeToolId) ?? emergencyTools[0], [activeToolId])
+  const step = tool.steps[stepIndex]
+  const [remaining, setRemaining] = useState(step.durationSeconds)
 
-  useEffect(() => setRemaining(tools[active].sec), [active])
   useEffect(() => {
-    const t = setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000)
-    return () => clearInterval(t)
+    setStepIndex(0)
+    setRemaining(tool.steps[0].durationSeconds)
+    logEmergencyUse(tool.id)
+  }, [tool.id, logEmergencyUse, tool.steps])
+
+  useEffect(() => {
+    setRemaining(step.durationSeconds)
+  }, [step.durationSeconds])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000)
+    return () => window.clearInterval(timer)
   }, [])
+
+  const canNext = remaining === 0
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-red-200">Emergency Regulation Tools</h1>
-      <div className="flex flex-wrap gap-2">{tools.map((t, i) => <button key={t.name} onClick={() => { setActive(i); logEmergencyUse(t.name) }} className={`px-3 py-2 rounded ${i===active ? 'bg-red-600' : 'bg-slate-800'}`}>{t.name}</button>)}</div>
-      <SectionCard title={tools[active].name}>
-        <BreathingCircle phase={remaining % 8 < 4 ? 'Inhale' : 'Exhale'} seconds={remaining} />
-        <ul className="list-disc pl-5">{tools[active].checklist.map(c => <li key={c}>{c}</li>)}</ul>
+      <div className="flex flex-wrap gap-2">
+        {emergencyTools.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveToolId(t.id)}
+            className={`px-3 py-2 rounded ${t.id === activeToolId ? 'bg-red-600' : 'bg-slate-800'}`}
+          >
+            {t.name}
+          </button>
+        ))}
+      </div>
+
+      <SectionCard title={tool.name}>
+        <p className="text-sm text-red-200/90 mb-3">Trigger: {tool.trigger}</p>
+        <p className="font-semibold mb-2">Step {stepIndex + 1} / {tool.steps.length}: {step.title}</p>
+        <p className="text-slate-200">{step.script}</p>
+        <BreathingCircle phase={canNext ? 'Complete' : 'Stay'} seconds={remaining} variant="emergency" />
+
+        <div className="flex gap-2">
+          <button
+            className="bg-red-600 px-4 py-2 rounded disabled:opacity-50"
+            disabled={!canNext || stepIndex === tool.steps.length - 1}
+            onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
+          >
+            Next (gated)
+          </button>
+          <button
+            className="bg-slate-700 px-4 py-2 rounded"
+            onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
+          >
+            Override now
+          </button>
+        </div>
       </SectionCard>
     </div>
   )

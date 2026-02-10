@@ -6,22 +6,86 @@ import { clearState, exportState } from '../lib/storage'
 export default function SettingsPage() {
   const { state, setState } = useAppState()
   const [name, setName] = useState(state.profile.name)
+  const [riskRule, setRiskRule] = useState(state.profile.riskRule)
+  const [dailyTarget, setDailyTarget] = useState(state.profile.dailyTarget)
+
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Settings & Profile</h1>
+      <h1 className="text-2xl font-bold">Settings</h1>
+
       <SectionCard title="Profile">
-        <input value={name} onChange={e => setName(e.target.value)} className="bg-slate-900 rounded p-2 w-full md:w-80" />
-        <button className="ml-0 md:ml-2 mt-2 md:mt-0 bg-violet-600 px-3 py-2 rounded" onClick={() => setState({ ...state, profile: { ...state.profile, name }})}>Save</button>
+        <div className="grid md:grid-cols-3 gap-2">
+          <input value={name} onChange={(e) => setName(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Name" />
+          <input value={riskRule} onChange={(e) => setRiskRule(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Risk rule" />
+          <input value={dailyTarget} onChange={(e) => setDailyTarget(e.target.value)} className="bg-slate-900 rounded p-2" placeholder="Daily target" />
+        </div>
+        <button
+          className="mt-2 bg-violet-600 px-3 py-2 rounded"
+          onClick={() =>
+            setState({
+              ...state,
+              profile: { ...state.profile, name, riskRule, dailyTarget },
+            })
+          }
+        >
+          Save profile
+        </button>
       </SectionCard>
-      <SectionCard title="Data">
-        <button className="bg-cyan-700 px-3 py-2 rounded mr-2" onClick={() => {
-          const blob = new Blob([exportState()], { type: 'application/json' })
-          const a = document.createElement('a')
-          a.href = URL.createObjectURL(blob)
-          a.download = 'traders-mind-export.json'
-          a.click()
-        }}>Export JSON</button>
-        <button className="bg-red-700 px-3 py-2 rounded" onClick={() => { clearState(); location.reload() }}>Clear all data</button>
+
+      <SectionCard title="Notifications">
+        <div className="grid md:grid-cols-2 gap-2 text-sm">
+          {Object.entries(state.notifications).map(([key, value]) => (
+            <label key={key} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={(e) =>
+                  setState({
+                    ...state,
+                    notifications: { ...state.notifications, [key]: e.target.checked },
+                  })
+                }
+              />
+              {key}
+            </label>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Data Controls">
+        <button
+          className="bg-cyan-700 px-3 py-2 rounded mr-2"
+          onClick={() => {
+            const blob = new Blob([exportState()], { type: 'application/json' })
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = 'traders-mind-export.json'
+            a.click()
+          }}
+        >
+          Export JSON
+        </button>
+        <button
+          className="bg-red-700 px-3 py-2 rounded"
+          onClick={() => {
+            clearState()
+            window.location.reload()
+          }}
+        >
+          Clear all data
+        </button>
+      </SectionCard>
+
+      <SectionCard title="Subscription">
+        <p className="text-sm text-slate-300">Current tier: {state.subscriptionTier}</p>
+        <div className="mt-2 flex gap-2">
+          <button className="bg-slate-800 px-3 py-2 rounded" onClick={() => setState({ ...state, subscriptionTier: 'Free' })}>
+            Free
+          </button>
+          <button className="bg-violet-700 px-3 py-2 rounded" onClick={() => setState({ ...state, subscriptionTier: 'Pro' })}>
+            Upgrade to Pro
+          </button>
+        </div>
       </SectionCard>
     </div>
   )
