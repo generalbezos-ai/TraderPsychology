@@ -6,3 +6,8 @@ it('renders phase and seconds', () => {
   expect(screen.getByText('Inhale')).toBeInTheDocument()
   expect(screen.getByText('3')).toBeInTheDocument()
 })
+
+it('supports variant styling', () => {
+  const { container } = render(<BreathingCircle phase="Stay" seconds={12} variant="emergency" />)
+  expect(container.querySelector('.ring-fast')).toBeInTheDocument()
+})
