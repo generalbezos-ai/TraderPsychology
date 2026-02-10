@@ -1,4 +1,6 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import EmptyState from '../components/EmptyState'
+import PageHeader from '../components/PageHeader'
 import SectionCard from '../components/SectionCard'
 import { buildInsightSeriesFromState, buildPatternAlerts } from '../lib/analytics'
 import { useAppState } from '../lib/state'
@@ -15,11 +17,15 @@ export default function InsightsPage() {
   const moodData = Object.entries(moodMix).map(([mood, count]) => ({ mood, count }))
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Insights</h1>
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow="Performance Intelligence"
+        title="Insights"
+        subtitle="Review behavior trends, pressure patterns, and risk signals before they become expensive habits."
+      />
 
       <SectionCard title="30-Day Psychology Trends">
-        <div className="h-72">
+        <div className="h-72" aria-label="30 day psychology trend chart">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -36,7 +42,7 @@ export default function InsightsPage() {
 
       <div className="grid md:grid-cols-2 gap-4">
         <SectionCard title="PnL vs Discipline">
-          <div className="h-64">
+          <div className="h-64" aria-label="pnl versus discipline chart">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.slice(-10)}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -50,11 +56,11 @@ export default function InsightsPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Mood Distribution (Real Logs)">
+        <SectionCard title="Mood Distribution">
           {moodData.length === 0 ? (
-            <p className="text-slate-400 text-sm">Log sessions to unlock mood distribution chart.</p>
+            <EmptyState title="No mood data yet" description="Log sessions to unlock mood distribution and emotional state analytics." />
           ) : (
-            <div className="h-64">
+            <div className="h-64" aria-label="mood distribution chart">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={moodData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
