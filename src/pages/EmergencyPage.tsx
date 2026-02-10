@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import BreathingCircle from '../components/BreathingCircle'
+import PageHeader from '../components/PageHeader'
 import SectionCard from '../components/SectionCard'
 import { emergencyTools } from '../lib/sampleData'
 import { useAppState } from '../lib/state'
@@ -34,29 +35,34 @@ export default function EmergencyPage() {
   const canNext = remaining === 0
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-red-200">Emergency Regulation Tools</h1>
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow="Rapid Stabilization"
+        title="Emergency regulation tools"
+        subtitle="When intensity spikes, follow the protocol exactly. Reset your physiology first, then decide."
+      />
+
       <div className="flex flex-wrap gap-2">
         {emergencyTools.map((t) => (
           <button
             key={t.id}
             onClick={() => setActiveToolId(t.id)}
-            className={`px-3 py-2 rounded ${t.id === activeToolId ? 'bg-red-600' : 'bg-slate-800'}`}
+            aria-pressed={t.id === activeToolId}
+            className={`app-button ${t.id === activeToolId ? 'app-button-danger' : 'app-button-muted'}`}
           >
             {t.name}
           </button>
         ))}
       </div>
 
-      <SectionCard title={tool.name}>
-        <p className="text-sm text-red-200/90 mb-3">Trigger: {tool.trigger}</p>
+      <SectionCard title={tool.name} subtitle={`Trigger: ${tool.trigger}`}>
         <p className="font-semibold mb-2">Step {stepIndex + 1} / {tool.steps.length}: {step.title}</p>
         <p className="text-slate-200">{step.script}</p>
         <BreathingCircle phase={canNext ? 'Complete' : 'Stay'} seconds={remaining} variant="emergency" />
 
         {!started ? (
           <button
-            className="bg-red-600 px-4 py-2 rounded"
+            className="app-button app-button-danger"
             onClick={() => {
               setStarted(true)
               logEmergencyUse(tool.id)
@@ -67,21 +73,21 @@ export default function EmergencyPage() {
         ) : (
           <div className="flex gap-2 flex-wrap">
             <button
-              className="bg-red-600 px-4 py-2 rounded disabled:opacity-50"
+              className="app-button app-button-danger disabled:opacity-50"
               disabled={!canNext || stepIndex === tool.steps.length - 1}
               onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
             >
-              Next (gated)
+              Next (timer gated)
             </button>
             <button
-              className="bg-slate-700 px-4 py-2 rounded"
+              className="app-button app-button-muted"
               onClick={() => setStepIndex((v) => Math.max(0, v - 1))}
               disabled={stepIndex === 0}
             >
               Back
             </button>
             <button
-              className="bg-slate-700 px-4 py-2 rounded"
+              className="app-button app-button-muted"
               onClick={() => setStepIndex((v) => Math.min(tool.steps.length - 1, v + 1))}
             >
               Override now

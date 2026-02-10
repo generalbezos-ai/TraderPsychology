@@ -14,7 +14,7 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 export default function App() {
   return (
     <StateProvider>
-      <Suspense fallback={<div className="p-6 text-slate-300">Loading...</div>}>
+      <Suspense fallback={<div className="p-6 text-slate-300" role="status" aria-live="polite">Loading your coaching dashboard…</div>}>
         <Routes>
           <Route element={<AppShell />}>
             <Route path="/" element={<HomePage />} />
