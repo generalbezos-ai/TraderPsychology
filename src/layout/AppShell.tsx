@@ -19,12 +19,12 @@ export default function AppShell() {
   const panic = state.panicModeUntil && new Date(state.panicModeUntil).getTime() > Date.now()
 
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[262px_1fr]">
+    <div className="min-h-screen md:grid md:grid-cols-[278px_1fr]">
       <aside className="hidden md:flex flex-col border-r border-slate-700/30 p-4 gap-2 sticky top-0 h-screen bg-slate-950/70 backdrop-blur-xl">
-        <div className="mb-5 rounded-xl border border-slate-700/60 bg-slate-900/50 p-3">
+        <div className="mb-5 rounded-2xl border border-slate-700/60 bg-slate-900/50 p-4">
           <p className="text-xs uppercase tracking-[0.22em] text-violet-300">Trader Psychology</p>
-          <h1 className="mt-1 text-2xl font-bold">Trader&apos;s Mind</h1>
-          <p className="mt-1 text-xs text-slate-400">Train composure. Execute with precision.</p>
+          <h1 className="mt-2 text-2xl font-bold">Trader&apos;s Mind</h1>
+          <p className="mt-1 text-xs text-slate-300">Train composure. Execute with precision.</p>
         </div>
         <nav aria-label="Primary navigation" className="space-y-1">
           {links.map(({ to, icon: Icon, label }) => (
@@ -33,8 +33,10 @@ export default function AppShell() {
               to={to}
               className={({ isActive }) =>
                 clsx(
-                  'px-3 py-2.5 rounded-lg flex items-center gap-2 text-sm transition-colors',
-                  isActive ? 'bg-violet-600/25 text-violet-100 border border-violet-300/30' : 'text-slate-300 hover:bg-slate-800/80',
+                  'tap-target px-3 py-2.5 rounded-xl flex items-center gap-2 text-sm transition-all',
+                  isActive
+                    ? 'bg-violet-600/25 text-violet-50 border border-violet-300/40 shadow-[0_8px_24px_rgba(139,123,255,0.16)]'
+                    : 'text-slate-200 hover:bg-slate-800/80 border border-transparent',
                 )
               }
             >
@@ -43,8 +45,8 @@ export default function AppShell() {
           ))}
         </nav>
       </aside>
-      <main className="fade-in mx-auto w-full max-w-7xl p-4 pb-28 md:p-8 space-y-3">
-        {panic && <div className="rounded-lg border border-red-400/40 bg-red-950/40 px-3 py-2 text-xs text-red-200">Panic mode is active. Focus on recovery protocols.</div>}
+      <main className="fade-in mx-auto w-full max-w-7xl p-4 pb-28 md:p-8 md:pb-10 space-y-4">
+        {panic && <div className="surface-subtle rounded-xl border-red-400/45 bg-red-950/45 px-4 py-2 text-xs text-red-100">Panic mode is active. Focus on recovery protocols.</div>}
         <Outlet />
       </main>
       <nav
@@ -57,7 +59,10 @@ export default function AppShell() {
             to={to}
             aria-label={label}
             className={({ isActive }) =>
-              clsx('text-[11px] flex flex-col items-center rounded-md px-1 py-1.5 transition-colors', isActive ? 'text-violet-300 bg-violet-900/30' : 'text-slate-400')
+              clsx(
+                'tap-target text-[11px] flex flex-col items-center rounded-lg px-1 py-1.5 transition-all',
+                isActive ? 'text-violet-200 bg-violet-900/35' : 'text-slate-300',
+              )
             }
           >
             <Icon size={16} aria-hidden="true" />

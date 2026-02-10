@@ -20,4 +20,8 @@ it('exposes navigation links with accessible labels', () => {
   expect(links.length).toBeGreaterThanOrEqual(7)
   expect(screen.getAllByRole('link', { name: /emergency/i }).length).toBeGreaterThanOrEqual(1)
   expect(screen.getAllByRole('link', { name: /settings/i }).length).toBeGreaterThanOrEqual(1)
+
+  links.slice(0, 7).forEach((link) => {
+    expect(link).toHaveClass('tap-target')
+  })
 })
